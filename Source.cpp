@@ -10,11 +10,22 @@
 //
 //				ÅIXV“ú:2019/09/27
 //
+//	•ÏX“ú	2020/04/10
+//			2021/05/01
+//
 //////////////////////////////////////////////////////////////
 
-#include<DxLib.h>
-#include<stdio.h>
-#include <string.h>			//memcpy()
+/////////////////
+//
+//	•ÏX“_
+//		EPƒL[‚ğ‰Ÿ‚·‚ÆA’u‚¯‚éêŠ‚Ì•\¦/”ñ•\¦‚ğØ‚è‘Ö‚¦‚é
+//		EæUŒãU/”’•‚ÌŒˆ‚ß•û
+//
+/////////(^_^)///
+
+#include <DxLib.h>
+#include <stdio.h>
+#include <string.h>			//memcopy()
 
 #define MARGIN 20			//”Õ–Ê‚ÌŠO‘¤‚Ì—]”’
 #define LAT 80				//‚PŠiq‚Ì‘å‚«‚³
@@ -35,6 +46,7 @@ int field[8][8] = {					//”Õ–Ê
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0} };
+
 int Myfield[8][8] = {				//’u‚¯‚éêŠ‚ğ‹L˜^‚·‚é
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0},
@@ -44,6 +56,7 @@ int Myfield[8][8] = {				//’u‚¯‚éêŠ‚ğ‹L˜^‚·‚é
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0},
 	{0,0,0,0,0,0,0,0} };
+
 int openness[8][8] = {				//ŠJ•ú“x
 	{60,60,60,60,60,60,60,60},
 	{60,60,60,60,60,60,60,60},
@@ -53,7 +66,8 @@ int openness[8][8] = {				//ŠJ•ú“x
 	{60,60,60,60,60,60,60,60},
 	{60,60,60,60,60,60,60,60},
 	{60,60,60,60,60,60,60,60} };
-int board[8][8] = {
+
+const int board[8][8] = {
 	{0,C,0,0,0,0,C,0},
 	{C,X,0,0,0,0,X,C},
 	{0,0,0,0,0,0,0,0},
@@ -75,10 +89,8 @@ int col_put = GetColor(228, 208, 4);							//’u‚¯‚éêŠ‚Ì•\¦F
 int blightness = 225;											//•\¦‚ğ–¾‚é‚³‚Ìİ’è
 int Handle_kuro, Handle_shiro;									//Î‚Ì‰æ‘œƒnƒ“ƒhƒ‹
 int Handle_ukuro, Handle_ushiro;								//”’•Œˆ’è‚Ì‰æ‘œƒnƒ“ƒhƒ‹
-int Handle_walll, Handle_wallr, Handle_wallc, Hnadle_wallo;		//‰B‚µ‚Ì‰æ‘œƒnƒ“ƒhƒ‹
 int Handle_sound;												//Œø‰Ê‰¹‚Ìƒnƒ“ƒhƒ‹
-int al = -150, ar = -150, ac = -150, ao = -150;					//‰B‚µ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“
-int player_col,CPU_col, ue, shita;								//•‚©”’‚ª“ü‚é
+int player_col,CPU_col;											//•‚©”’‚ª“ü‚é
 int kuro_num, shiro_num;										//•‚Æ”’‚ÌÎ‚Ì”
 int zero_num, O_num = 0;										//Î‚ğ’u‚¢‚Ä‚È‚¢êŠA’u‚¯‚éêŠ‚Ì”
 int turn = 1;													//‰½è–Ú‚©
@@ -90,120 +102,151 @@ int fieldX, fieldY;												//— •Ô‚·êŠ‚Ìx,yÀ•W
 int winner;														//ŸÒ
 int x, y;														//field[y][x]
 int v = 1, g = 3;												//‘¬‚³‚Æ‰Á‘¬“x
-int mark = 0, marka = 0;										//Î‚ğ’u‚¯‚éêŠ‚Ì•\¦/”ñ•\¦
-int loop = 1;
+//int mark = 0, marka = 0;										//Î‚ğ’u‚¯‚éêŠ‚Ì•\¦/”ñ•\¦
+int loop = 1;													//1‰ñ–Ú‚Ìƒ‹[ƒv‚Å’u‚¯‚È‚¢‚ÍAƒŒƒxƒ‹‚ğ‰º‚°‚é
+char inputChar;
+bool ismark = false;
 
 void lattice(){
 	int sx, sy, fx, fy;
 	int i, j;
+
 	sx = MARGIN, sy = MARGIN, fx = sx + LAT, fy = sy + LAT;
+
 	for (i = 0; i < 8; i++) {
 		for (j = 0; j < 8; j++) {
 			DrawBox(sx, sy, fx, fy, col_whi, FALSE);
 			sx += LAT, fx += LAT;
 		}
+
 		sx = MARGIN, fx = sx + LAT;
 		sy += LAT, fy += LAT;
 	}
 }
 
-void updowndecision() {										//ãA‰º‚ğŒˆ’è
-	if (GetRand(1) == 0) {
-		ue = KURO;
-		shita = SHIRO;
+void drawBoard() {
+	DrawBox(0, 0, 680, 680, col_bann, TRUE);
+	lattice();					//”Õ–Ê‚ÌŠiq
+
+	//Î‚Ì•\¦//
+	for (y = 0; y < 8; y++) {
+		for (x = 0; x < 8; x++) {
+			if (field[y][x] == KURO)
+				DrawGraph(x*LAT + MARGIN, y*LAT + MARGIN, Handle_kuro, TRUE);
+			else if (field[y][x] == SHIRO)
+				DrawGraph(x*LAT + MARGIN, y*LAT + MARGIN, Handle_shiro, TRUE);
+		}
+	}
+}
+
+void rouletteWhiteBlack() {
+	bool black = false;
+
+	while (!CheckHitKey(KEY_INPUT_SPACE)) {					//SPACE‚ª‰Ÿ‚³‚ê‚é‚Ü‚Å
+		SetDrawScreen(DX_SCREEN_BACK);
+		DrawBox(0, 0, 680, 680, col_bann, TRUE);			//”Õ‚Ì—Î
+		DrawFormatString(200, 160, col_whi, "ƒXƒy[ƒXƒL[‚ÅŒˆ’èI");
+
+		black = !black;
+
+		if (black) {
+			DrawGraph(240, 240, Handle_ukuro, TRUE);
+		}
+		else {
+			DrawGraph(240, 240, Handle_ushiro, TRUE);
+		}
+
+		ScreenFlip();
+		WaitTimer(120);
+	}
+
+	if (black) {
+		player_col = KURO;
+		CPU_col = SHIRO;
 	}
 	else {
-		ue = SHIRO;
-		shita = KURO;
-	}
-}
-
-void kakushiClose() {										//‰B‚·ƒAƒjƒ[ƒVƒ‡ƒ“
-	while (ProcessMessage() == 0) {
-		SetDrawScreen(DX_SCREEN_BACK);
-		if (al < 240)
-			al += 5;
-		else if (ar < 240)
-			ar += 5;
-		else if (ac < 240)
-			ac += 5;
-		else if (ao < 240)
-			ao += 5;
-		DrawBox(0, 0, 680, 680, col_bann, TRUE);			//”Õ‚Ì—Î
-		DrawFormatString(700, 50, col_whi, "æUŒãU‚ÌŒˆ’è\n");
-		DrawGraph(240, al, Handle_walll, TRUE);
-		DrawGraph(240, ar, Handle_wallr, TRUE);
-		DrawGraph(240, ac, Handle_wallc, TRUE);
-		DrawGraph(240, ao, Hnadle_wallo, TRUE);
-		ScreenFlip();
-		if (ao == 240)
-			break;
-	}
-}
-
-void kakushiOpen() {										//‰B‚µ‚ğã‚É‚ ‚°‚é
-	while (ProcessMessage() == 0) {
-		SetDrawScreen(DX_SCREEN_BACK);
-		DrawBox(0, 0, 680, 680, col_bann, TRUE);			//”Õ‚Ì—Î
-		if (ue == KURO)
-			DrawGraph(240, 230, Handle_ukuro, TRUE);
-		else if (ue == SHIRO)
-			DrawGraph(240, 230, Handle_ushiro, TRUE);
-		DrawGraph(240, al, Handle_walll, TRUE);
-		DrawGraph(240, ar, Handle_wallr, TRUE);
-		DrawGraph(240, ac, Handle_wallc, TRUE);
-		DrawGraph(240, ao, Hnadle_wallo, TRUE);
-		al -= 5, ar -= 5, ac -= 5, ao -= 5;
-		ScreenFlip();
-		if (al == -240)
-			break;
+		player_col = SHIRO;
+		CPU_col = KURO;
 	}
 }
 
 void start() {
 	int x = 100;
+
 	SetFontSize(250);
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClearDrawScreen();
+
 	DrawFormatString(x-8, 156, col_kin, "START");
 	DrawFormatString(x, 160, col_aka, "START");
+
 	ScreenFlip();
+
 	WaitTimer(880);
+
 	for (;;) {
 		ClearDrawScreen();
+
 		x += v;
 		v += g;
+
 		DrawFormatString(x - 8, 155, col_kin, "START");
 		DrawFormatString(x, 160, col_aka, "START");
+
 		ScreenFlip();
+
 		if (x >= 1000)
 			break;
 	}
+
 	SetFontSize(30);
+
 	v = 1;								//‰Šú‰»
+}
+
+bool inputKey(int chara) {			//'chara'ƒL[‚ª‰Ÿ‚³‚ê‚½uŠÔ
+	static int key = 0;
+
+	if (CheckHitKey(chara)) {
+		if (key == 0) {				//‰Ÿ‚³‚ê‚½uŠÔ
+			key = 1;
+			return true;
+		}
+		else if (key == 1)
+			key = 2;
+	}
+	else							//‰Ÿ‚µ‚Ä‚¢‚é“r’†‚©A‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢B
+		key = 0;
+
+	return false;
 }
 
 int NumberofStone(int col) {			//”Õ–Ê‚ÌÎ‚Ì”‚ğ”‚¦‚é
 	int x, y;
 	int number = 0;
+
 	for (y = 0; y < 8; y++) {
 		for (x = 0; x < 8; x++) {
 			if (field[y][x] == col)
 				number++;
 		}
 	}
+
 	return number;
 }
 
 int OnBoard(int x, int y, int a, int b) {								//“n‚µ‚½êŠ‚ª”Õã‚É‚ ‚é‚©‚ğ’²‚×‚é
 	if ((x + a) < 0 || (x + a) > 7 || (y + b) < 0 || (y + b) > 7)		//x‚©‚ça•ûŒüAy‚©‚çb•ûŒü‚Éi‚ñ‚ÅAŠO‚Éo‚½
 		return 1;
+
 	return 0;	//’†‚É‚¢‚é
 }
 
 int LineResearch(int q,int p,int b,int a,int Col,int nCol) {			//©•ª‚ÌÎ‚Ü‚Å‚Ì‘Šè‚ÌÎ‚Ì”‚ğ•Ô‚·
 	int i;
+
 	for (i = 1; field[q + i * b][p + i * a] == nCol; i++){}
+
 	if (OnBoard(p, q, a*i, b * i) == 0 && field[q + i * b][p + i * a] == Col)
 		return i - 1;
 	else
@@ -212,6 +255,7 @@ int LineResearch(int q,int p,int b,int a,int Col,int nCol) {			//©•ª‚ÌÎ‚Ü‚Å‚Ì‘
 
 int PutCanOrNot(int Col,int nCol) {										//Î‚ª’u‚¯‚éêŠ‚Ì”»’è
 	int x, y, a, b;
+
 	for (y = 0; y < 8; y++) {
 		for (x = 0; x < 8; x++) {										//©•ª‚ÌêŠ
 			if (Myfield[y][x] != KURO && Myfield[y][x] != SHIRO) {		//Î‚ª‚ ‚é‚Í•Ï‚¦‚È‚¢
@@ -226,12 +270,15 @@ int PutCanOrNot(int Col,int nCol) {										//Î‚ª’u‚¯‚éêŠ‚Ì”»’è
 			}
 		}
 	}
+
 	return 0;
 }
 
 int MousePosition(int a) {						//ƒJ[ƒ\ƒ‹‚ÌA”Õ–Ê‚ÌˆÊ’u‚ğ•Ô‚·
 	int MouseX, MouseY;
+
 	GetMousePoint(&MouseX, &MouseY);
+
 	if (a == 24)								//xÀ•W‚ğ•Ô‚·
 		return (MouseX - MARGIN) / LAT;
 	else if (a == 25)							//yÀ•W‚ğ•Ô‚·
@@ -240,11 +287,14 @@ int MousePosition(int a) {						//ƒJ[ƒ\ƒ‹‚ÌA”Õ–Ê‚ÌˆÊ’u‚ğ•Ô‚·
 
 void TurnOver(int fieldX, int fieldY, int Col, int nCol) {				//ŠÔ‚ÌÎ‚ğ— •Ô‚·
 	int number, a, b, i;
+
 	for (b = -1; b <= 1; b++) {
 		for (a = -1; a <= 1; a++) {										//8•ûŒü‚Æ¡‚ÌêŠ
 			if (a == 0 && b == 0)										//¡‚ÌêŠ‚Íˆ—‚µ‚È‚¢
 				continue;
+
 			number = LineResearch(fieldY, fieldX, b, a, Col, nCol);		//ŠÔ‚É‚ ‚é‘Šè‚ÌÎ‚Ì”
+
 			for (i = 1; i <= number; i++) {								//ŠÔ‚ÌÎ‚Ì”‚¾‚¯
 				field[fieldY + b * i][fieldX + a * i] = Col;			//— •Ô‚µ
 			}
@@ -254,6 +304,7 @@ void TurnOver(int fieldX, int fieldY, int Col, int nCol) {				//ŠÔ‚ÌÎ‚ğ— •Ô‚·
 
 int CornerAttack() {									//”Õ‚Ì‹÷‚©‚ç‚Æ‚é
 	int i, j;
+
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < 2; j++) {
 			if (Myfield[i * 7][j * 7] == OK) {			//’u‚¯‚éê‡
@@ -262,23 +313,26 @@ int CornerAttack() {									//”Õ‚Ì‹÷‚©‚ç‚Æ‚é
 			}
 		}
 	}
+
 	return 1;											//’u‚¯‚È‚¢ê‡
 }
 
-int Direction(int num) {//ƒ„ƒXƒŠU‚ß‚Ì•ûŒü‚ğŒˆ‚ß‚é
+int Direction(int num) {		//ƒ„ƒXƒŠU‚ß‚Ì•ûŒü‚ğŒˆ‚ß‚é
 	switch (num) {
-	case 0:				//¶ or ã‚É‚¢‚é
-		return 1;		//‰E or ‰º•ûŒü‚ğ•Ô‚·
-	case 7:				//‰E or ‰º‚É‚¢‚é
-		return -1;		//¶ or ã•ûŒü‚ğ•Ô‚·
+	case 0:						//¶ or ã‚É‚¢‚é
+		return 1;				//‰E or ‰º•ûŒü‚ğ•Ô‚·
+	case 7:						//‰E or ‰º‚É‚¢‚é
+		return -1;				//¶ or ã•ûŒü‚ğ•Ô‚·
 	default:
 		break;
 	}
+
 	return 0;
 }
 
 int FileAttack_kai(int Col,int nCol) {
 	int i, j, k, dir;
+
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < 2; j++) {
 			if (Myfield[i * 7][j * 7] == Col) {
@@ -286,6 +340,7 @@ int FileAttack_kai(int Col,int nCol) {
 				for (k = 1; k < 7; k++) {								//©•ª‚ÌF‚ÌA‘Šè‚ÌF‚Ì‚Í‚»‚Ì—×
 					if (Myfield[i * 7 + 0][j * 7 + k * dir] == Col|| Myfield[i * 7 + 0][j * 7 + k * dir] == nCol)
 						continue;
+
 					if (Myfield[i * 7 + 0][j * 7 + k * dir] == OK) {	//’u‚¯‚é
 						fieldX = j * 7 + k * dir, fieldY = i * 7;
 						return 0;										//¬Œ÷
@@ -296,13 +351,17 @@ int FileAttack_kai(int Col,int nCol) {
 			}
 		}
 	}
+
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < 2; j++) {
 			if (Myfield[i * 7][j * 7] == Col) {
+
 				dir = Direction(i * 7);									//ã‰º•ûŒü
+
 				for (k = 1; k < 7; k++) {
 					if (Myfield[i * 7 + k * dir][j * 7 + 0] == Col || Myfield[i * 7 + k * dir][j * 7 + 0] == nCol)
 						continue;
+
 					if (Myfield[i * 7 + k * dir][j * 7 + 0] == OK) {
 						fieldX = j * 7, fieldY = i * 7 + k * dir;
 						return 0;										//¬Œ÷
@@ -313,21 +372,26 @@ int FileAttack_kai(int Col,int nCol) {
 			}
 		}
 	}
+
 	return 1;															//ƒ„ƒXƒŠU‚ß‚Å‚«‚È‚¢ê‡
 }
 
 int DegreeofOpenness(int fieldX, int fieldY, int Col, int nCol) {					//ŠJ•ú“x—˜_
 	int number = 0, a, b, c, d, i, count;
+
 	for (b = -1; b <= 1; b++) {														//‚Ç‚Ì•ûŒü‚É‰½ŒÂ— •Ô‚¹‚é‚©
 		for (a = -1; a <= 1; a++) {													//8•ûŒü‚Æ¡‚ÌêŠ
 			if (a == 0 && b == 0)													//¡‚ÌêŠ‚Íˆ—‚µ‚È‚¢
 				continue;
+
 			count = LineResearch(fieldY, fieldX, b, a, Col, nCol);					//ŠÔ‚É‚ ‚é‘Šè‚ÌÎ‚Ì”
+
 			for (i = 1; i <= count; i++) {											//— •Ô‚³‚ê‚éŠeÎ‚É‚Â‚¢‚ÄAŠJ•ú“x‚ğ”‚¦‚é
 				for (d = -1; d <= 1; d++) {
 					for (c = -1; c <= 1; c++) {										//8•ûŒü‚ÅA‹ó‚¢‚Ä‚¢‚éêŠ‚Ì”
 						if (c == 0 && d == 0)
 							continue;
+
 						if (field[fieldY + b * i + d][fieldX + a * i + c] == 0)		//Î‚ª’u‚¢‚Ä‚¢‚È‚¢
 							number++;
 						/* a*i,b*i‚Åi‚Ş•ûŒü‚ğ’è‹`‚µAc,d‚ÅŠm”F‚·‚é•ûŒü‚ğ’è‹`‚µ‚Ä‚¢‚é */
@@ -336,102 +400,100 @@ int DegreeofOpenness(int fieldX, int fieldY, int Col, int nCol) {					//ŠJ•ú“x—
 			}
 		}
 	}
+
 	return number;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
 	SetMainWindowText("REVERSI");
+
 	SetWindowIconID(333);
+
 	ChangeWindowMode(TRUE);							//”ñ‘S‰æ–Ê‚ÉƒZƒbƒg
 	SetGraphMode(1000, 680, 32);					//‰æ–ÊƒTƒCƒYw’è
 	SetOutApplicationLogValidFlag(FALSE);			//Log.txt‚ğ¶¬‚µ‚È‚¢‚æ‚¤‚Éİ’è
 	if (DxLib_Init() == 1) { return -1; }			//‰Šú‰»‚É¸”s‚ÉƒGƒ‰[‚ğ“f‚©‚¹‚ÄI—¹
+
 	SetMouseDispFlag(TRUE);							// ƒ}ƒEƒX‚ğ•\¦ó‘Ô‚É‚·‚é
+
 	//‰æ‘œ‚Ì“Ç‚İ‚İ//
 	Handle_kuro = LoadGraph("black.PNG");
 	Handle_shiro = LoadGraph("white.PNG");
 	Handle_ukuro = LoadGraph("black_up.PNG");
 	Handle_ushiro = LoadGraph("white_up.PNG");
-	Handle_walll = LoadGraph("wall_left2.PNG");
-	Handle_wallr = LoadGraph("wall_right2.PNG");
-	Handle_wallc = LoadGraph("wall_center2.PNG");
-	Hnadle_wallo = LoadGraph("wall_up2.PNG");
 	Handle_sound = LoadSoundMem("sound1.mp3");
 
 	ClearDrawScreen();												//— ‰æ–ÊÁ‚·
 	SetDrawScreen(DX_SCREEN_BACK);									//•`‰ææ‚ğ— ‰æ–Ê‚É
+
 	ChangeFont("Snap ITC");
 	SetFontSize(180);
+
 	DrawFormatString(0, 260, col_gre, "REVERSI");					//ƒ^ƒCƒgƒ‹•\¦
 	ScreenFlip();
+
 	WaitTimer(3000);
+
 	for (int i = 0; i < 45; i++) {									//ˆÃ‚­‚È‚Á‚ÄÁ‚¦‚Ä‚¢‚­
 		ClearDrawScreen();
+
 		blightness -= 5;
+
 		SetDrawBright(blightness, blightness, blightness);
+
 		DrawFormatString(0, 260, col_gre, "REVERSI");
 		ScreenFlip();
 	}
+
 	SetDrawBright(225, 225, 225);									//–¾‚é‚³‚ğ–ß‚·
+
 	ChangeFont("Arial-ltalicMT");									//ƒtƒHƒ“ƒgİ’è
 	SetFontSize(30);
+
 	WaitTimer(1000);
+
 	//æU‚ÌŒˆ’è//
 	ClearDrawScreen();
 	SetDrawScreen(DX_SCREEN_BACK);
+
 	DrawBox(0, 0, 680, 680, col_bann, TRUE);						//”Õ‚Ì—Î
 	ScreenFlip();
+
 	WaitTimer(800);
+
 	DrawFormatString(700, 50, col_whi, "æUŒãU‚ÌŒˆ’è\n");
 	ScreenFlip();
-	updowndecision();
-	WaitTimer(1800);
-	kakushiClose();
-	WaitTimer(880);
-	SetDrawScreen(DX_SCREEN_BACK);
-	DrawFormatString(700, 50, col_whi, "æUŒãU‚ÌŒˆ’è\n");
-	DrawFormatString(100, 20, col_whi, "‰º‚Ì” ‚Ì’†‚ÉÎ‚ªˆê‚Â’u‚©‚ê‚Ü‚µ‚½B");
-	DrawFormatString(100, 60, col_whi, "Î‚ÌF‚Íƒ‰ƒ“ƒ_ƒ€.æU‚Í•‚Å‚·");
-	DrawFormatString(100, 100, col_whi, "ã‚©‰º‚ğ‚Å‘I‚ñ‚Å‚Ë");
-	DrawFormatString(250, 140, col_whi, "ªƒL[Fã, \n«ƒL[F‰º");
-	ScreenFlip();
-	for (;;) {    //ã‰ºƒL[‚Å‰æ–Ê‚ªØ‚è‘Ö‚í‚é
-		int key = WaitKey();
-		if (key == KEY_INPUT_UP) {
-			player_col = ue;
-			CPU_col = shita;
-		}
-		else if (key == KEY_INPUT_DOWN) {
-			player_col = shita;
-			CPU_col = ue;
-		}
-		break;
-	}
-	kakushiOpen();
 	WaitTimer(800);
+
+	rouletteWhiteBlack();
+
 	if (player_col == KURO) {
 		DrawFormatString(100, 60, col_whi, "‚ ‚È‚½‚Í•");
+		DrawFormatString(100, 100, col_whi, "•‚ÍæU");
 		senkou = PLAYER;
 		koukou = CPU;
-	}
-	else if(player_col==SHIRO){
+	} else if(player_col==SHIRO){
 		DrawFormatString(100, 60, col_whi, "‚ ‚È‚½‚Í”’");
+		DrawFormatString(100, 100, col_whi, "”’‚ÍŒãU");
 		senkou = CPU;
 		koukou = PLAYER;
 	}
-	DrawFormatString(100, 100, col_whi, "æU‚Í•");
+
 	ScreenFlip();
-	WaitTimer(2000);
+	WaitTimer(2600);
+
 	start();
+
 	WaitTimer(100);
+
 	///ƒQ[ƒ€–{‘Ì///
-	while (ProcessMessage() == 0)
-	{
+	while (ProcessMessage() == 0){
 		ClearDrawScreen();
 		SetDrawScreen(DX_SCREEN_BACK);
-		DrawBox(0, 0, 680, 680, col_bann, TRUE);
-		lattice();					//”Õ–Ê‚ÌŠiq
+
+		//DrawBox(0, 0, 680, 680, col_bann, TRUE);
+		//lattice();					//”Õ–Ê‚ÌŠiq
+
 		switch (turn % 2) {
 		case 1:						//•”Ô
 			MyCol = KURO;
@@ -442,11 +504,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			OppCol = KURO;
 			break;
 		}
+
 		//”Õ–Ê‚Ì•\¦//
 		kuro_num = NumberofStone(KURO);				//”’‚Æ•‚ÌÎ‚Ì”‚ğ’²‚×‚é
 		shiro_num = NumberofStone(SHIRO);
 		zero_num = NumberofStone(0);
 		SetFontSize(70);							//‰E‘¤‚Ì•\‹L
+
 		switch (turn % 2) {
 		case 0:
 			DrawFormatString(760, 60, col_whi, "”’”Ô");
@@ -455,8 +519,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DrawFormatString(760, 60, col_whi, "•”Ô");
 			break;
 		}
+
 		SetFontSize(30);
 		DrawLine(700, 145, 980, 145, col_whi);
+
 		if (senkou == PLAYER) {
 			DrawFormatString(750, 280, col_whi, "•Fplayer");
 			DrawFormatString(750, 320, col_whi, "”’FCPU");
@@ -465,81 +531,94 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DrawFormatString(750, 280, col_whi, "•FCPU");
 			DrawFormatString(750, 320, col_whi, "”’Fplayer");
 		}
+
 		DrawFormatString(700, 400, col_whi, "Î‚Ì”");
 		DrawFormatString(720, 440, col_whi, "•%8dÎ", kuro_num);
 		DrawFormatString(720, 480, col_whi, "”’%8dÎ", shiro_num);
 		DrawFormatString(820, 160, col_whi, "%2dè–Ú", turn);
+
 		DrawBox(720, 565, 960, 650, col_pink, TRUE);				//ƒsƒ“ƒN‚Ìƒ{ƒbƒNƒX
-		DrawFormatString(740, 575, col_ao, "PƒL[‚Å’u‚¯‚é\n  êŠ‚ğ•\¦");
-		//Î‚Ì•\¦//
-		for (y = 0; y < 8; y++) {
-			for (x = 0; x < 8; x++) {
-				if (field[y][x] == KURO)
-					DrawGraph(x*LAT + MARGIN, y*LAT + MARGIN, Handle_kuro, TRUE);
-				else if (field[y][x] == SHIRO)
-					DrawGraph(x*LAT + MARGIN, y*LAT + MARGIN, Handle_shiro, TRUE);
-			}
-		}
+		if(ismark)
+			DrawFormatString(740, 575, col_ao, "PƒL[‚Å’u‚¯‚é\n êŠ‚ğ”ñ•\¦");
+		else
+			DrawFormatString(740, 575, col_ao, "PƒL[‚Å’u‚¯‚é\n  êŠ‚ğ•\¦");
+
+		drawBoard();
+
 		ScreenFlip();
+
 		//”Õ–Ê‚ª‘S•”–„‚Ü‚Á‚½A‚Ç‚¿‚ç‚©‚ÌÎ‚ª‚È‚­‚È‚Á‚½ê‡‚ÍI—¹
 		if (kuro_num == 0 || shiro_num == 0 || zero_num == 0)
 			break;
+
 		PutCanOrNot(MyCol, OppCol);				//MyCol(•‚©”’)‚Ì’u‚¯‚éêŠ‚ğ’²‚×‚é
+
 		for (y = 0; y < 8; y++) {				//’u‚¯‚éêŠ(OK)‚ª‚ ‚é‚©’²‚×‚é
 			for (x = 0; x < 8; x++) {
 				if (Myfield[y][x] == OK)
 					O_num++;
 			}
 		}
+
 		if (O_num == 0) {			//’u‚¯‚éêŠ‚ª‚OŒÂ‚Ì‚Æ‚«
 			SetFontSize(40);
 			DrawBox(150, 240, 850, 440, col_pink, TRUE);				//ƒsƒ“ƒN‚Ìƒ{ƒbƒNƒX
 			DrawFormatString(200, 300, col_ao, "Î‚ğ’u‚¯‚éêŠ‚ª‚È‚­‚È‚è‚Ü‚µ‚½\n\t\t‘Šè‚Ìƒ^[ƒ“‚É‚È‚è‚Ü‚·");
 			ScreenFlip();
+
 			for (;;) {
 				if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0)			//‰Ÿ‚³‚ê‚Ä‚¢‚é
 					break;
 			}
-			turn++, O_num = 0;											//‰Šú‰»
+
+			turn++;														//‰Šú‰»
+			O_num = 0;
 			SetFontSize(30);
+
 			continue;
 		}
+
 		if (player_col == MyCol) {										//player‚Ì“ü—Í
 			while (1) {
 				//Î‚ğ’u‚¯‚éêŠ‚Ì•\¦/”ñ•\¦
-				if (CheckHitKey(KEY_INPUT_P) == 0) {					//‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢
-					if (marka > 0)										//—£‚µ‚½uŠÔ
-						marka = -1;
-					else												//‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢‚Æ‚«
-						marka = 0;
+				if (inputKey(KEY_INPUT_P)) {							//PƒL[‚ª‰Ÿ‚³‚ê‚½uŠÔ‚È‚ç
+					ismark = !ismark;									//•\¦/”ñ•\¦‚ÌØ‚è‘Ö‚¦
+
+					SetDrawScreen(DX_SCREEN_BACK);
+					drawBoard();
 				}
-				else
-					marka++;
-				if (marka == -1)
-					mark = (mark + 1) % 2;
-				if (mark == 1) {
+
+				if (ismark) {											//•\¦‚Ì‚¾‚¯
 					for (y = 0; y < 8; y++) {
-						for (x = 0; x < 8; x++) {						//Ô‚¢ŠÛ‚Å’u‚¯‚éêŠ‚ğ•\¦
+						for (x = 0; x < 8; x++) {						//‰©F‚¢ŠÛ‚Å’u‚¯‚éêŠ‚ğ•\¦
 							if (Myfield[y][x] == OK)
 								DrawCircle(MARGIN + LAT * x + LAT / 2, MARGIN + LAT * y + LAT / 2, 20, col_put, TRUE);
 						}
 					}
 				}
+
 				ScreenFlip();
+
 				if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0) {		//‰Ÿ‚³‚ê‚Ä‚¢‚é
 					fieldX = MousePosition(24);
 					fieldY = MousePosition(25);
+
 					if (Myfield[fieldY][fieldX] == OK)					//Î‚ğ’u‚¯‚éêŠ‚¾‚Á‚½‚çwhile•¶‚ğ‚Ê‚¯‚é
 						break;
 				}
 			}
+
+			//ismark = false;
 		}
+
 		if (CPU_col == MyCol) {																//CPU
 			WaitTimer(1000);
 			CornerAttack();
+
 			if (CornerAttack() == 0) {}														//‹÷‚É’u‚¯‚½ê‡
 			else {
 				FileAttack_kai(MyCol, OppCol);
+
 				if (FileAttack_kai(MyCol, OppCol) == 0) {}									//ƒ„ƒXƒŠU‚ß¬Œ÷
 				else{																		//ŠJ•ú“x—˜_
 					do {
@@ -547,25 +626,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							for (x = 0; x < 8; x++) {
 								if (Myfield[y][x] != OK)									//Î‚ğ’u‚¯‚é‚¾‚¯ŠJ•ú“x‚ğŒvZ‚·‚é
 									continue;
+
 								if ((board[y][x] == C || board[y][x] == X) && loop == 1)
 									continue;
+
 								openness[y][x] = DegreeofOpenness(x, y, MyCol, OppCol);
+
 								if (openness[y][x] < least) {								//ŠJ•ú“x‚ÌÅ¬’l‚ğ’T‚·
 									least = openness[y][x];									//Å¬’l‚ğ•Û‘¶
 									leastX = x, leastY = y;									//x,yÀ•W‚ğ•Û‘¶
 								}
 							}
 						}
+
 						fieldX = leastX, fieldY = leastY;
 						loop++;
+
 					} while (OnBoard(fieldX, fieldY, 0, 0) == 1);
 				}
 			}
 		}
+
 		loop = 1;										//‰Šú‰»
+
 		field[fieldY][fieldX] = MyCol;					//‘I‘ğ‚µ‚½êŠ‚ğ— •Ô‚·
 		WaitTimer(400);
 		PlaySoundMem(Handle_sound, DX_PLAYTYPE_BACK);	//Œø‰Ê‰¹
+
 		switch (MyCol) {
 		case KURO:
 			DrawGraph(fieldX*LAT + MARGIN, fieldY*LAT + MARGIN, Handle_kuro, TRUE);
@@ -574,8 +661,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DrawGraph(fieldX*LAT + MARGIN, fieldY*LAT + MARGIN, Handle_shiro, TRUE);
 			break;
 		}
+
 		WaitTimer(800);
 		TurnOver(fieldX, fieldY, MyCol, OppCol);		//ŠÔ‚ğ— •Ô‚·
+
 		//Myfield[][] = field[][]A— •Ô‚µ‚½‚Æ‚±‚ë‚ğ”½‰f
 		memcpy(Myfield, field, sizeof(Myfield));		//field‚ğMyfield‚É‘S‘ÌƒRƒs[
 		for (y = 0; y < 8; y++) {						//openness‚ğ‰Šú‰»
@@ -583,51 +672,70 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				openness[y][x] = 60;
 			}
 		}
-		least = 60;
+
+		least = 60;											//‰Šú‰»
 		ScreenFlip();
+
 		if (CheckHitKey(KEY_INPUT_L))						//Šm”F—p
 			break;
+
 		turn++, O_num = 0;									//‰Šú‰»
 	}
+
 	DrawBox(150, 240, 540, 440, col_pink, TRUE);			//ƒsƒ“ƒN‚Ìƒ{ƒbƒNƒX
+
 	DrawFormatString(200, 300, col_ao, "@!!ƒQ[ƒ€I—¹!!@\nƒNƒŠƒbƒN‚ÅŒ‹‰Ê”­•\");
 	ScreenFlip();
+
 	for (;;) {
 		if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0)		//‰Ÿ‚³‚ê‚Ä‚¢‚é
 			break;
 	}
+
 	ClearDrawScreen();
+
 	//ƒQ[ƒ€I—¹//
 	kuro_num = NumberofStone(KURO);							//”’‚Æ•‚ÌÎ‚Ì”‚ğ’²‚×‚é
 	shiro_num = NumberofStone(SHIRO);
-	zero_num = NumberofStone(0);
+	//zero_num = NumberofStone(0);
+
 	if (kuro_num > shiro_num)								//‘½‚¢•û‚ªŸ‚¿
 		winner = senkou;
 	else if (kuro_num < shiro_num)
 		winner = koukou;
+
 	SetFontSize(100);
+
 	//Œ‹‰Ê•\¦//
 	DrawBox(200, 100, 800, 240, col_pink, TRUE);				//ƒsƒ“ƒN‚Ìƒ{ƒbƒNƒX
+
 	if (winner == PLAYER)
 		DrawFormatString(290, 120, col_ao, "You Win.");
 	else if (winner == CPU)
 		DrawFormatString(280, 120, col_ao, "You Lose.");
 	else if (kuro_num == shiro_num)
 		DrawFormatString(370, 120, col_ao, "Draw.");
+
 	SetFontSize(65);
 	DrawBox(520, 310, 860, 415, col_pink, TRUE);				//ƒsƒ“ƒN‚Ìƒ{ƒbƒNƒX
 	DrawFormatString(540, 330, col_ao, "Try Again");
+
 	SetFontSize(50);
 	DrawFormatString(100, 300, col_whi, "Î‚Ì”");
 	DrawFormatString(150, 390, col_whi, "•%4dÎ", kuro_num);
 	DrawFormatString(150, 470, col_whi, "”’%4dÎ", shiro_num);
+
 	SetFontSize(30);
 	ScreenFlip();
+
 	for (;;) {
 		if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0)			//‰Ÿ‚³‚ê‚Ä‚¢‚é
 		break;
 	}
+
 	WaitKey();
+
 	DxLib_End();
+
 	return 0;
 }
